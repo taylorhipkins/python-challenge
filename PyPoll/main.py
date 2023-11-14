@@ -30,19 +30,29 @@ with open(election_data_csv, 'r') as file:
             candidates[candidate] = 1
 
 # Print the results
-print("Election Results")
-print("-------------------------")
-print(f"Total Votes: {total_votes}")
-print("-------------------------")
+PyPoll_results = "Election Results\n"
+PyPoll_results += "-------------------------\n"
+PyPoll_results += f"Total Votes: {total_votes}\n"
+PyPoll_results += "-------------------------\n"
 
 # Loop through candidates and calculate percentages
 for candidate, votes in candidates.items():
     percentage = (votes / total_votes) * 100
-    print(f"{candidate}: {percentage:.3f}% ({votes})")
+    PyPoll_results += f"{candidate}: {percentage:.3f}% ({votes})\n"
 
-print("-------------------------")
+PyPoll_results += "-------------------------\n"
 
 # Find the winner based on popular vote
 winner = max(candidates, key=candidates.get)
-print(f"Winner: {winner}")
-print("-------------------------")
+PyPoll_results += f"Winner: {winner}\n"
+PyPoll_results += "-------------------------"
+
+# Print analysis to terminal
+print(PyPoll_results)
+
+# Export analysis results to a text file
+output_file = 'PyPoll_Results.txt'
+with open(output_file, 'w') as file:
+    file.write(PyPoll_results)
+
+    print(f"Results exported to '{output_file}'")

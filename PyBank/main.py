@@ -1,63 +1,64 @@
 import os
 import csv
 
-# file path
+# Path to the input file
 budgetdata_csv = os.path.join("PyBank", "Resources", "budget_data.csv")
-
-# Initialize variables 
+# Initialize variables
 total_months = 0
 net_total = 0
-previous_profit_loss = 0
-changes = []
-greatest_increase = {"date": "", "amount": 0}
-greatest_decrease = {"date": "", "amount": 0}
+prev_profit_loss = 0
+profit_changes = []
+dates = []
 
-# Open and read the CSV file
-with open(budgetdata_csv, 'r') as file:
-    # Skip the header row
-    header = next(file)
-
-    # Loop through data
-    for line in file:
-        # Split the line into columns
-        date, profit_loss = line.strip().split(',')
-
-        # Convert profit_loss to an integer
-        profit_loss = int(profit_loss)
-
-        # Calculate total number of months
+# Read the CSV file
+with open(budgetdata_csv, newline='') as csvfile:
+    csvreader = csv.reader(csvfile, delimiter=',')
+    header = next(csvreader)  # Skip header row
+    for row in csvreader:
+        # Count total months
         total_months += 1
-
-        # Calculate net total amount
+        
+        # get date and profit/loss
+        date = row[0]
+        dates.append(date)
+        profit_loss = int(row[1])
+        
+        # Calculate net total amount of profit/losses
         net_total += profit_loss
+        
+        # Calculate changes in profit/losses
+        if total_months > 1:
+            change = profit_loss - prev_profit_loss
+            profit_changes.append(change)
+        prev_profit_loss = profit_loss
 
-        # Calculate change in profit/loss
-        if previous_profit_loss != 0:
-            change = profit_loss - previous_profit_loss
-            changes.append(change)
-            # Check for greatest increase
-            if change > greatest_increase["amount"]:
-                greatest_increase["date"] = date
-                greatest_increase["amount"] = change
+# Calculate average change
+average_change = sum(profit_changes) / len(profit_changes)
 
-            # Check for greatest decrease
-            if change < greatest_decrease["amount"]:
-                greatest_decrease["date"] = date
-                greatest_decrease["amount"] = change
-        # Update previous profit/loss 
-        previous_profit_loss = profit_loss
+# Find greatest increase and decrease 
+greatest_increase = max(profit_changes)
+greatest_decrease = min(profit_changes)
 
-# Calculate the sum of all changes
-sum_changes = sum(changes)
+# Retrieve dates for greatest increase and decrease
+increase_date = dates[profit_changes.index(greatest_increase) + 1]
+decrease_date = dates[profit_changes.index(greatest_decrease) + 1]
 
-# Calculate the average change
-average_change = sum_changes / len(changes) if len(changes) > 0 else 0
+# Prepare analysis results
+analysis_results = f"""Financial Analysis
+----------------------------
+Total Months: {total_months}
+Total: ${net_total}
+Average Change: ${average_change:.2f}
+Greatest Increase in Profits: {increase_date} (${greatest_increase})
+Greatest Decrease in Profits: {decrease_date} (${greatest_decrease})
+"""
 
-# Print the results
-print("Financial Analysis")
-print("-----------------------------")
-print(f"Total Months: {total_months}")
-print(f"Total: ${net_total}")
-print(f"Average Change: ${average_change:.2f}")
-print(f"Greatest Increase in Profits: {greatest_increase['date']} (${greatest_increase['amount']})")
-print(f"Greatest Decrease in Profits: {greatest_decrease['date']} (${greatest_decrease['amount']})")
+# Print analysis to terminal
+print(analysis_results)
+
+# Export analysis results to a text file
+output_file = 'PyBank_Results.txt'
+with open(output_file, 'w') as file:
+    file.write(analysis_results)
+
+    print(f"Results exported to '{output_file}'")
